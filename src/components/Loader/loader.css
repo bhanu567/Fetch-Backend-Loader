@@ -1,17 +1,16 @@
 .loader {
-  border: 16px solid #f3f3f3; /* Light grey */
-  border-top: 16px solid red; /* Blue */
+  margin: 10% auto 1% auto;
+  width: 200px;
+  aspect-ratio: 1;
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
-  animation: spin 2s linear infinite;
+  background: radial-gradient(farthest-side, white 94%, #0000) top/8px 8px
+      no-repeat,
+    conic-gradient(#0000 30%, white);
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+  animation: l13 1s infinite linear;
 }
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
+@keyframes l13 {
   100% {
-    transform: rotate(360deg);
+    transform: rotate(1turn);
   }
 }

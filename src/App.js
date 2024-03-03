@@ -8,6 +8,7 @@ function App() {
   const [movies, setMovie] = useState([]);
   const [display, setDisplay] = useState(false);
   const [displayLoader, setDisplayLoader] = useState(false);
+  const [error, setError] = useState(null);
 
   // function fetchMoviesHandler() {
   //   fetch("https://swapi.dev/api/films")
@@ -29,17 +30,26 @@ function App() {
   //Using Async Await
   async function fetchMoviesHandler() {
     setDisplayLoader(true);
-    const response = await fetch("https://swapi.dev/api/films");
-    const JSONresponse = await response.json();
-    const transformedMoviesList = JSONresponse.results.map((movieData) => ({
-      id: movieData.episode_id,
-      title: movieData.title,
-      openingText: movieData.opening_crawl,
-      releaseDate: movieData.release_date,
-    }));
-    setMovie(transformedMoviesList);
-    setDisplay(true);
-    setDisplayLoader(false);
+    setError(null);
+    try {
+      const response = await fetch("https://swapi.dev/api/films");
+      if (!response.ok) {
+        throw new Error("Something went wrong ....Retrying");
+      }
+      const JSONresponse = await response.json();
+      const transformedMoviesList = JSONresponse.results.map((movieData) => ({
+        id: movieData.episode_id,
+        title: movieData.title,
+        openingText: movieData.opening_crawl,
+        releaseDate: movieData.release_date,
+      }));
+      setMovie(transformedMoviesList);
+      setDisplay(true);
+      setDisplayLoader(false);
+      setError(null);
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   function backButtonHandler() {
@@ -47,8 +57,34 @@ function App() {
     setMovie([]);
   }
 
-
-    return (
+  let content = "";
+  if (displayLoader) {
+    content = <Loader />;
+  }
+  if (error) {
+    setTimeout(fetchMoviesHandler, 5000);
+    content = (
+      <Fragment>
+        <h1
+          style={{ textAlign: "center", color: "white", margin: "1rem 0rem" }}
+        >
+          {error}
+        </h1>
+        <Loader />
+        <button
+          style={{ padding: "0.5rem 2rem", cursor: "pointer", marginLeft:'47%', marginTop:'10%' }}
+          onClick={() => {
+            setError(null);
+            setDisplayLoader(false);
+          }}
+        >
+          Cancel
+        </button>
+      </Fragment>
+    );
+  }
+  if (!displayLoader) {
+    content = (
       <Fragment>
         {!display && (
           <DisplayMovieButton
@@ -56,13 +92,14 @@ function App() {
           ></DisplayMovieButton>
         )}
         <section>
-        {displayLoader && <Loader></Loader>}
-         {!displayLoader && <MovieList movies={movies}></MovieList>} 
+          <MovieList movies={movies}></MovieList>
         </section>
         {display && <BackButton goToPrevious={backButtonHandler}></BackButton>}
       </Fragment>
     );
+  }
 
+  return content;
 }
 
 export default App;

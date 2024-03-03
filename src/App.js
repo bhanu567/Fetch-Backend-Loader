@@ -1,8 +1,9 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import MovieList from "./components/MoviesList";
 import DisplayMovieButton from "./components/DisplayMovieButton";
 import BackButton from "./components/BackButton";
 import Loader from "./components/Loader/loader";
+import { useCallback } from "react";
 
 function App() {
   const [movies, setMovie] = useState([]);
@@ -28,7 +29,7 @@ function App() {
   // }
 
   //Using Async Await
-  async function fetchMoviesHandler() {
+  const fetchMoviesHandler = useCallback(async function () {
     setDisplayLoader(true);
     setError(null);
     try {
@@ -50,13 +51,15 @@ function App() {
     } catch (error) {
       setError(error.message);
     }
-  }
+  }, []);
 
   function backButtonHandler() {
     setDisplay(false);
     setMovie([]);
   }
-
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
   let content = "";
   if (displayLoader) {
     content = <Loader />;
@@ -72,7 +75,12 @@ function App() {
         </h1>
         <Loader />
         <button
-          style={{ padding: "0.5rem 2rem", cursor: "pointer", marginLeft:'47%', marginTop:'10%' }}
+          style={{
+            padding: "0.5rem 2rem",
+            cursor: "pointer",
+            marginLeft: "47%",
+            marginTop: "10%",
+          }}
           onClick={() => {
             setError(null);
             setDisplayLoader(false);

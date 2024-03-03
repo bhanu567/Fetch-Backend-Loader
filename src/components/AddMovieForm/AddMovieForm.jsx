@@ -9,15 +9,10 @@ const AddMovieForm = (props) => {
   const submitHandler = (e) => {
     e.preventDefault();
     const newMovie = {
-      id: Math.floor(Math.random() * 10),
       title: titleRef.current.value,
       openingText: openingTextRef.current.value,
       releaseDate: releaseDateRef.current.value,
     };
-    console.log(newMovie);
-    titleRef.current.value = "";
-    openingTextRef.current.value = "";
-    releaseDateRef.current.value = "";
     props.addNewMovie(newMovie);
   };
   return (

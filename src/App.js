@@ -35,18 +35,24 @@ function App() {
     setDisplayLoader(true);
     setError(null);
     try {
-      const response = await fetch("https://swapi.dev/api/films");
+      const response = await fetch(
+        "https://react-http-8fc7a-default-rtdb.firebaseio.com/movies.json"
+      );
       if (!response.ok) {
         throw new Error("Something went wrong ....Retrying");
       }
       const JSONresponse = await response.json();
-      const transformedMoviesList = JSONresponse.results.map((movieData) => ({
-        id: movieData.episode_id,
-        title: movieData.title,
-        openingText: movieData.opening_crawl,
-        releaseDate: movieData.release_date,
-      }));
-      setMovie(transformedMoviesList);
+
+      let loadedMovies = [];
+      for (let key in JSONresponse) {
+        loadedMovies.push({
+          id: key,
+          title: JSONresponse[key].title,
+          openingText: JSONresponse[key].openingText,
+          releaseDate: JSONresponse[key].releaseDate,
+        });
+      }
+      setMovie(loadedMovies);
       setDisplayLoader(false);
     } catch (error) {
       setError(error.message);
@@ -57,13 +63,45 @@ function App() {
     setMovie([]);
   }
 
-  function addNewMovieHandler(newMovie) {
-    setMovie((prevMovies) => [...prevMovies, newMovie]);
+  async function addNewMovieHandler(newMovie) {
+    const response = await fetch(
+      "https://react-http-8fc7a-default-rtdb.firebaseio.com/movies.json",
+      {
+        method: "POST",
+        body: JSON.stringify(newMovie),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data);
     setDispalyForm(false);
   }
 
   function addMovieHandler() {
     setDispalyForm(true);
+  }
+
+  async function deleteMovieHandler(e) {
+    let title = e.target.parentElement.children[0].innerHTML;
+    let id = "";
+    for (let index = 0; index < movies.length; index++) {
+      if (movies[index].title === title) {
+        id = movies[index].id;
+      }
+    }
+    console.log(id);
+    await fetch(
+      "https://react-http-8fc7a-default-rtdb.firebaseio.com/movies/"+id+".json",
+      {
+        method: "Delete",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    fetchMoviesHandler();
   }
 
   useEffect(() => {
@@ -116,7 +154,10 @@ function App() {
             ></Button>
           )}
           <section>
-            <MovieList movies={movies}></MovieList>
+            <MovieList
+              movies={movies}
+              deleteButton={deleteMovieHandler}
+            ></MovieList>
           </section>
           <Button title="Go Back" buttonFunction={backButtonHandler}></Button>
         </Fragment>

@@ -1,6 +1,6 @@
 import React from "react";
 
-const BackButton = (props) => {
+const Button = (props) => {
   return (
     <section
       style={{
@@ -11,12 +11,12 @@ const BackButton = (props) => {
     >
       <button
         style={{ padding: "0.5rem 2rem", cursor: "pointer" }}
-        onClick={props.goToPrevious}
+        onClick={props.buttonFunction}
       >
-        Go Back
+        {props.title}
       </button>
     </section>
   );
 };
 
-export default BackButton;
+export default Button;

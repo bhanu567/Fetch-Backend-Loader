@@ -1,15 +1,17 @@
 import React, { useState, Fragment, useEffect } from "react";
-import MovieList from "./components/MoviesList";
-import DisplayMovieButton from "./components/DisplayMovieButton";
-import BackButton from "./components/BackButton";
+import MovieList from "./components/Movie/MoviesList";
+import Button from "./components/Button/Button";
 import Loader from "./components/Loader/loader";
+import AddMovieForm from "./components/AddMovieForm/AddMovieForm";
 import { useCallback } from "react";
 
 function App() {
+  let content = "";
+
   const [movies, setMovie] = useState([]);
-  const [display, setDisplay] = useState(false);
   const [displayLoader, setDisplayLoader] = useState(false);
   const [error, setError] = useState(null);
+  const [displayForm, setDispalyForm] = useState(false);
 
   // function fetchMoviesHandler() {
   //   fetch("https://swapi.dev/api/films")
@@ -45,25 +47,33 @@ function App() {
         releaseDate: movieData.release_date,
       }));
       setMovie(transformedMoviesList);
-      setDisplay(true);
       setDisplayLoader(false);
-      setError(null);
     } catch (error) {
       setError(error.message);
     }
   }, []);
 
   function backButtonHandler() {
-    setDisplay(false);
     setMovie([]);
   }
+
+  function addNewMovieHandler(newMovie) {
+    setMovie((prevMovies) => [...prevMovies, newMovie]);
+    setDispalyForm(false);
+  }
+
+  function addMovieHandler() {
+    setDispalyForm(true);
+  }
+
   useEffect(() => {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
-  let content = "";
+
   if (displayLoader) {
     content = <Loader />;
   }
+
   if (error) {
     setTimeout(fetchMoviesHandler, 5000);
     content = (
@@ -91,20 +101,46 @@ function App() {
       </Fragment>
     );
   }
+
   if (!displayLoader) {
-    content = (
-      <Fragment>
-        {!display && (
-          <DisplayMovieButton
-            fetchData={fetchMoviesHandler}
-          ></DisplayMovieButton>
-        )}
-        <section>
-          <MovieList movies={movies}></MovieList>
-        </section>
-        {display && <BackButton goToPrevious={backButtonHandler}></BackButton>}
-      </Fragment>
-    );
+    if (movies.length) {
+      content = (
+        <Fragment>
+          {displayForm && (
+            <AddMovieForm addNewMovie={addNewMovieHandler}></AddMovieForm>
+          )}
+          {!displayForm && (
+            <Button
+              title="Add Movies"
+              buttonFunction={addMovieHandler}
+            ></Button>
+          )}
+          <section>
+            <MovieList movies={movies}></MovieList>
+          </section>
+          <Button title="Go Back" buttonFunction={backButtonHandler}></Button>
+        </Fragment>
+      );
+    } else {
+      content = (
+        <Fragment>
+          {displayForm && (
+            <AddMovieForm addNewMovie={addNewMovieHandler}></AddMovieForm>
+          )}
+          {!displayForm && (
+            <Button
+              title="Add Movies"
+              buttonFunction={addMovieHandler}
+            ></Button>
+          )}
+
+          <Button
+            title="Fetch Movies"
+            buttonFunction={fetchMoviesHandler}
+          ></Button>
+        </Fragment>
+      );
+    }
   }
 
   return content;
